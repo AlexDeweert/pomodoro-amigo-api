@@ -1,0 +1,22 @@
+{
+  "name": "pomodoro-amigo-api",
+  "version": "1.0.0",
+  "description": "An ExpressJS REST API for PomodoroAmigo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexDeweert/pomodoro-amigo-api.git"
+  },
+  "author": "Alex L. Deweert",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexDeweert/pomodoro-amigo-api/issues"
+  },
+  "homepage": "https://github.com/AlexDeweert/pomodoro-amigo-api#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
