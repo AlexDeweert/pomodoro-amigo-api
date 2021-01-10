@@ -9,7 +9,7 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 
-app.use('/users', require('./routes/users'))
+app.use('/', require('./routes/users'))
 
 const port = process.env.API_LISTEN_PORT
 app.listen(port, () => {
