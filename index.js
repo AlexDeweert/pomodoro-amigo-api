@@ -1,12 +1,17 @@
 const express=require('express')
+if(process.env.NODE_ENV == 'development') {
+    console.log("detected development environment")
+    require('dotenv').config()
+}
 const app = express()
-const port = 5000
 
-app.get('/', (req,res) => {
-    console.log("Something called the / route")
-    res.send('Hello world')
-})
+//Body parsing
+app.use(express.json())
+app.use(express.urlencoded({extended: false}))
 
+app.use('/users', require('./routes/users'))
+
+const port = process.env.API_LISTEN_PORT
 app.listen(port, () => {
     console.log("ExpressJS App listening at port: " + port)
 })
