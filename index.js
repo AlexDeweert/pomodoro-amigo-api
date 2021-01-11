@@ -11,6 +11,7 @@ app.use(express.urlencoded({extended: false}))
 
 app.use('/', require('./routes/users'))
 app.use('/', require('./routes/timers'))
+app.use('/', require('./routes/intervals'))
 
 const port = process.env.API_LISTEN_PORT
 app.listen(port, () => {

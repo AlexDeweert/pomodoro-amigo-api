@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const db = require('../database')
 //const pgp = require('pg-promise')()
 //const db = pgp(process.env.DB_CONN_STRING)
 
@@ -32,12 +33,10 @@ router.post('/users/add', (req,res) => {
 
 router.get('/users/get', (req,res)=> {
     let email = req.query.email
-    let token = req.query.token
-    console.log(token)
     db.one('select * from users where email = ($1)', [email])
     .then((result)=> {
         console.log("Got a result: " + JSON.stringify(result))
-        res.status(200).send({'Success':'Got user ' + JSON.stringify(result)})
+        res.status(200).send({result:result})
     })
     .catch(error => {
         console.log("Error: ", error.detail)
