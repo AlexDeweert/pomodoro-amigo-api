@@ -1,7 +1,7 @@
-var express = require('express')
-var router = express.Router()
-var pgp = require('pg-promise')()
-var db = pgp(process.env.DB_CONN_STRING)
+const express = require('express')
+const router = express.Router()
+//const pgp = require('pg-promise')()
+//const db = pgp(process.env.DB_CONN_STRING)
 
 /**
  * Create a user
