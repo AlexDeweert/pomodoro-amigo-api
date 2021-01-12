@@ -1,24 +1,44 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../database')
+const {v4:uuid} = require('uuid');
 
 //This needs to be much more robust.
 //Need to look into secure forms of registration, password encryption etc.
 router.post('/register', (req,res) => {
     let email = req.body.email
     let password = req.body.password
-    db.none('insert into users (email, password) values ($1, $2)', [email,password])
-    .then(()=>{
-        res.status(200).send({success:"Registered successfully"})
-    })
-    .catch( err => {
-        if(err.constraint == 'unique_email_constraint') {
-            res.status(409).json({error:'Attempted to register duplicate user'})
-        }
-        else {
-            res.status(500).json({error:'Unknown error in registration => '+ err})
-        }
-    })
+    
+    if(email && password) {
+        db.any('select exists(select 1 from users where email = $1)', [email])
+        .then( (result)=> {
+            let canRegister = !result[0].exists
+            if(canRegister) {
+                let token = uuid()
+                db.none('insert into users (email, password, api_token) values ($1, $2, $3)', [email,password,token])
+                .then(()=>{
+                    res.status(200).send({success:"Registered successfully", token:token})
+                })
+                .catch( err => {
+                    throw new Error("Could not insert into users in register endpoint. " + err)
+                })
+            }
+            else {
+                res.status(409).json({error:'Attempted to register duplicate user'})
+            }
+        })
+        .catch((err) => {
+            res.status(500).send({error:"Unknown error in registration => " + err})
+        })
+    }
+    else {
+        res.status(404).send({unauthorized:"Require both email and password to register for this service."})
+    }
+    
+
+/*
+*/
+
 })
 
 module.exports = router
