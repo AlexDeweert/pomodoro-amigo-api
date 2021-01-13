@@ -6,9 +6,13 @@ const {v4:uuid} = require('uuid');
 //This needs to be much more robust.
 //Need to look into secure forms of registration, password encryption etc.
 router.post('/register', (req,res) => {
+    console.log('something tried to register')
     let email = req.body.email
     let password = req.body.password
     
+    console.log(email)
+    console.log(password)
+
     if(email && password) {
         db.any('select exists(select 1 from users where email = $1)', [email])
         .then( (result)=> {
@@ -24,7 +28,7 @@ router.post('/register', (req,res) => {
                 })
             }
             else {
-                res.status(409).json({error:'Attempted to register duplicate user'})
+                res.status(409).json({conflict:'Attempted to register duplicate user'})
             }
         })
         .catch((err) => {
@@ -34,11 +38,6 @@ router.post('/register', (req,res) => {
     else {
         res.status(404).send({unauthorized:"Require both email and password to register for this service."})
     }
-    
-
-/*
-*/
-
 })
 
 module.exports = router

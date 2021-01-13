@@ -1,9 +1,10 @@
 const express=require('express')
-if(process.env.NODE_ENV == 'development') {
-    console.log("detected development environment")
-    require('dotenv').config()
-}
+const cors = require('cors')
 const app = express()
+if(process.env.NODE_ENV == 'development') require('dotenv').config()
+
+//Cross origin
+app.use(cors())
 
 //Body parsing
 app.use(express.json())
