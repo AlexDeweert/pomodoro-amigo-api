@@ -21,22 +21,22 @@ router.post('/register', (req,res) => {
                 let token = uuid()
                 db.none('insert into users (email, password, api_token) values ($1, $2, $3)', [email,password,token])
                 .then(()=>{
-                    res.status(200).send({success:"Registered successfully", token:token})
+                    res.status(200).send({message:"Registered successfully.", token:token})
                 })
                 .catch( err => {
-                    throw new Error("Could not insert into users in register endpoint. " + err)
+                    throw new Error("Could not insert into users in register endpoint.")
                 })
             }
             else {
-                res.status(409).json({conflict:'Attempted to register duplicate user'})
+                res.status(409).json({message:'Error. Attempted to register duplicate account.'})
             }
         })
         .catch((err) => {
-            res.status(500).send({error:"Unknown error in registration => " + err})
+            res.status(500).send({message:"Unknown server error during registration."})
         })
     }
     else {
-        res.status(404).send({unauthorized:"Require both email and password to register for this service."})
+        res.status(404).send({message:"Error. You require both an email and password to register."})
     }
 })
 

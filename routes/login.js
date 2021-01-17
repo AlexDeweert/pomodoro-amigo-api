@@ -19,15 +19,15 @@ router.post('/login', (req,res) => {
         db.any('select * from users where api_token=$1', [api_token])
         .then((result)=>{
             if(result.length) {
-                if(result[0].api_token == api_token) res.status(200).send({token_authorized:"Login Success, user had a valid token"})
-                else res.status(401).send({invalid_token: "Login failure. Users token was unauthorized. Try email and password."})
+                if(result[0].api_token == api_token) res.status(200).send({message:"Login Success", token:result[0].api_token})
+                else res.status(401).send({message: "Login failure. Auth token unauthorized, try email and password."})
             }
             else {
-                res.status(404).send({invalid_token: "Token invalid. A valid token was not found in the user database."})
+                res.status(404).send({message: "Token invalid. A valid token was not found in the user database."})
             }
         })
         .catch((err)=>{
-            res.status(500).send({error: "An unknown error occurred trying to validate an api_token in the login endpoint => " + err.detail})
+            res.status(500).send({message: "An unknown server error occurred trying to validate an api_token in the login endpoint"})
         })
     }
 
@@ -35,19 +35,19 @@ router.post('/login', (req,res) => {
         db.any('select * from users where email=$1', [email])
         .then((result)=>{
             if(result.length) {
-                if(result[0].password === password) res.status(200).send({success:"Registered successfully"})
-                else res.status(401).send({unauthorized: "Unauthorized Access. Password did not match."})
+                if(result[0].password === password) res.status(200).send({message:"Logged in successfully", token:result[0].api_token})
+                else res.status(401).send({message: "Unauthorized Access. Password did not match."})
             }
             else {
-                res.status(404).send({notfound: "There was no user account with that e-mail."})
+                res.status(404).send({message: "There was no user account with that e-mail."})
             }
         })
         .catch( err => {
-            res.status(500).json({error:'Unknown error in login route => ' + err.detail})
+            res.status(500).json({message:'Unknown server error in login.'})
         })
     }
     else {
-        res.status(401).json({unauthorized:'Please. Login requires either a valid username/password or an authorized api_token'})
+        res.status(401).json({message:'Login requires either a valid username and password'})
     }
 
 })
