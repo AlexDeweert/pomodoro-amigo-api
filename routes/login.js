@@ -47,7 +47,7 @@ router.post('/login', (req,res) => {
         })
     }
     else {
-        res.status(401).json({message:'Login requires either a valid username and password'})
+        res.status(401).json({message:'Login requires both a valid username and password.'})
     }
 
 })
