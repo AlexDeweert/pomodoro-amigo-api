@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../database')
+const {v4:uuid} = require('uuid')
 
 //This needs to be much more robust.
 //Need to look into secure forms of registration, password encryption etc.
@@ -19,11 +20,11 @@ router.post('/login', (req,res) => {
         db.any('select * from users where api_token=$1', [api_token])
         .then((result)=>{
             if(result.length) {
-                if(result[0].api_token == api_token) res.status(200).send({message:"Login Success", token:result[0].api_token, user_id:result[0].user_id})
+                if(result[0].api_token == api_token) res.status(200).send({message:"Logged in successfully", token:result[0].api_token, user_id:result[0].user_id})
                 else res.status(401).send({message: "Login failure. Auth token unauthorized, try email and password."})
             }
             else {
-                res.status(404).send({message: "Token invalid. A valid token was not found in the user database."})
+                res.status(404).send({message: "Login expired. Please login again."})
             }
         })
         .catch((err)=>{
@@ -33,31 +34,37 @@ router.post('/login', (req,res) => {
 
     else if(email && password) {
         console.log("there was an email and password %s", [email,password])
-        db.any('select * from users where email=$1', [email])
-        .then((result)=>{
-            console.log("1")
-            if(result.length) {
-                if(result[0].password === password) {
-                    res.status(200).send({message:"Logged in successfully", token:result[0].api_token, user_id:result[0].user_id})
-                    console.log("sent user_id %s", result[0].user_id)
+        let new_api_token = uuid()
+        db.none('update users set api_token=$1 where email=$2', [new_api_token,email])
+        .then(()=>{
+            db.any('select * from users where email=$1', [email])
+            .then((result)=>{
+                if(result.length) {
+                    if(result[0].password === password) {
+                        //Logging in again should generate a new token - since if they logged out before, or their token is expired
+                        //that means the api_token is null on the client side - so we re-issue a new one and then they don't have to
+                        //login again until the current token is expired
+                        res.status(200).send({message:"Logged in successfully", token:result[0].api_token, user_id:result[0].user_id})
+                        console.log("sent user_id %s", result[0].user_id)
+                        }
+                    else {
+                        res.status(401).send({message: "Unauthorized Access. Password did not match."})
                     }
-                else {
-                    console.log("2")
-                    res.status(401).send({message: "Unauthorized Access. Password did not match."})
                 }
-            }
-            else {
-                console.log("3")
-                res.status(404).send({message: "There was no user account with that e-mail."})
-            }
+                else {
+                    res.status(404).send({message: "There was no user account with that e-mail."})
+                }
+            })
+            .catch( err => {
+                res.status(500).send({message:'Unknown server error in login.'})
+            })
         })
         .catch( err => {
-            console.log("4")
-            res.status(500).send({message:'Unknown server error in login.'})
+            console.log('Error trying to update api token on login: %s', err)
+            res.status(500).send({message:'Server error on login'})
         })
     }
     else {
-        console.log("5")
         res.status(401).send({message:'Login requires both a valid username and password.'})
     }
 

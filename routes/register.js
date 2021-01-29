@@ -19,9 +19,9 @@ router.post('/register', (req,res) => {
             let canRegister = !result[0].exists
             if(canRegister) {
                 let token = uuid()
-                db.none('insert into users (email, password, api_token) values ($1, $2, $3)', [email,password,token])
-                .then(()=>{
-                    res.status(200).send({message:"Registered successfully.", token:token})
+                db.any('insert into users (email, password, api_token) values ($1, $2, $3) returning *', [email,password,token])
+                .then((insert_result)=>{
+                    res.status(200).send({message:"Registered successfully.", token:token, user_id:insert_result[0].user_id})
                 })
                 .catch( err => {
                     throw new Error("Could not insert into users in register endpoint.")
