@@ -19,7 +19,7 @@ router.post('/login', (req,res) => {
         db.any('select * from users where api_token=$1', [api_token])
         .then((result)=>{
             if(result.length) {
-                if(result[0].api_token == api_token) res.status(200).send({message:"Login Success", token:result[0].api_token})
+                if(result[0].api_token == api_token) res.status(200).send({message:"Login Success", token:result[0].api_token, user_id:result[0].user_id})
                 else res.status(401).send({message: "Login failure. Auth token unauthorized, try email and password."})
             }
             else {
@@ -32,22 +32,33 @@ router.post('/login', (req,res) => {
     }
 
     else if(email && password) {
+        console.log("there was an email and password %s", [email,password])
         db.any('select * from users where email=$1', [email])
         .then((result)=>{
+            console.log("1")
             if(result.length) {
-                if(result[0].password === password) res.status(200).send({message:"Logged in successfully", token:result[0].api_token})
-                else res.status(401).send({message: "Unauthorized Access. Password did not match."})
+                if(result[0].password === password) {
+                    res.status(200).send({message:"Logged in successfully", token:result[0].api_token, user_id:result[0].user_id})
+                    console.log("sent user_id %s", result[0].user_id)
+                    }
+                else {
+                    console.log("2")
+                    res.status(401).send({message: "Unauthorized Access. Password did not match."})
+                }
             }
             else {
+                console.log("3")
                 res.status(404).send({message: "There was no user account with that e-mail."})
             }
         })
         .catch( err => {
-            res.status(500).json({message:'Unknown server error in login.'})
+            console.log("4")
+            res.status(500).send({message:'Unknown server error in login.'})
         })
     }
     else {
-        res.status(401).json({message:'Login requires both a valid username and password.'})
+        console.log("5")
+        res.status(401).send({message:'Login requires both a valid username and password.'})
     }
 
 })
