@@ -6,8 +6,9 @@ router.post('/intervals/add', (req,res) => {
     let description = req.body.description
     let timer_id = req.body.timer_id
     let duration = req.body.duration
+    let interval_id = req.body.interval_id
 
-    db.one('insert into intervals(description, timer_id, duration) values($1, $2, $3) returning *', [description, timer_id, duration])
+    db.one('insert into intervals(description, timer_id, duration, interval_id) values($1, $2, $3, $4) returning *', [description, timer_id, duration, interval_id])
     .then( (result) => {
         res.status(200).send({success:"Successfully inserted new interval" + JSON.stringify(result)})
     })

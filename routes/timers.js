@@ -5,11 +5,14 @@ const db = require('../database')
 router.post('/timers/add', (req,res) => {
     let description = req.body.description
     let user_id = req.body.user_id
-    db.one('insert into timers(description, user_id) values($1, $2) returning *', [description, user_id])
+    let timer_id = req.body.timer_id
+    console.log([description, user_id, timer_id])
+    db.one('insert into timers(description, user_id, timer_id) values($1, $2, $3) returning *', [description, user_id, timer_id])
     .then( (result) => {
         res.status(200).send({success:"Successfully inserted new timer" + JSON.stringify(result), timer_id:result.timer_id})
     })
     .catch( (err) => {
+        console.log(err)
         res.status(500).send({error:"Error on /timers/add route " + JSON.stringify(err.detail)})
     })
 })
