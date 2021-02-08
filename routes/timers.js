@@ -6,8 +6,9 @@ router.post('/timers/add', (req,res) => {
     let description = req.body.description
     let user_id = req.body.user_id
     let timer_id = req.body.timer_id
-    console.log([description, user_id, timer_id])
-    db.one('insert into timers(description, user_id, timer_id) values($1, $2, $3) returning *', [description, user_id, timer_id])
+    let rank = req.body.rank
+    console.log([description, user_id, timer_id, rank])
+    db.one('insert into timers(description, user_id, timer_id, rank) values($1, $2, $3, $4) returning *', [description, user_id, timer_id, rank])
     .then( (result) => {
         res.status(200).send({success:"Successfully inserted new timer" + JSON.stringify(result), timer_id:result.timer_id})
     })
@@ -54,6 +55,7 @@ router.put('/timers/update', (req,res) => {
 
 //Requires a timer_id to delete
 router.delete('/timers/delete', (req,res) => {
+    console.log("tried to delete with timer_id %s", req.body.timer_id)
     let timer_id = req.body.timer_id
     if(timer_id) {
         db.one('delete from timers where timer_id = $1 returning *', [timer_id])
