@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../database')
+const pgp = require('pg-promise')({})
 
 router.post('/timers/add', (req,res) => {
     let description = req.body.description
@@ -22,7 +23,7 @@ router.post('/timers/add', (req,res) => {
 router.get('/timers/get', (req,res) => {
     let user_id = req.query.user_id
     if(user_id) {
-        db.any('select * from timers where user_id = $1', [user_id])
+        db.any('select * from timers where user_id = $1 order by rank asc', [user_id])
         .then( (result)=> {
             res.status(200).send({result:result})
         })
@@ -51,6 +52,27 @@ router.put('/timers/update', (req,res) => {
     else {
         res.status(400).send({error:'Bad request: Updating a timer requires a timer_id and an updated description'})
     }
+})
+
+//Update the rank of multiple timers simultaneously
+router.put('/timers/update-ranks', (req,res)=>{
+    let data = req.body
+    let updateData = []
+    Object.keys(data).forEach((key,value)=>{
+        let timerData = {timer_id:data[key].timer_id, rank:parseInt(key)}
+        updateData.push(timerData)
+    })
+    let columnSet = new pgp.helpers.ColumnSet(['?timer_id','rank'], {table:'timers'})
+    let update = pgp.helpers.update(updateData, columnSet) + 'where v.timer_id = t.timer_id'
+    db.none(update)
+    .then(()=>{
+        console.log("success")
+        res.status(200).send()
+    })
+    .catch((error)=>{
+        console.log(error)
+        res.status(500).send()
+     })
 })
 
 //Requires a timer_id to delete
